@@ -1,0 +1,24 @@
+version: '3'
+services:
+  event:
+    restart: always
+    build:
+      context: .
+      dockerfile: ./apps/llp-performance-aggregate-api/Dockerfile
+    image: ${COMPOSE_PROJECT_NAME}-event
+    env_file:
+      - .env
+    ports:
+      - '${EVENT_EXPOSE_PORT}:${API_PORT}'
+    command: node ./dist/apps/event-dispatcher/main.js
+  worker:
+    restart: always
+    build:
+      context: .
+      dockerfile: ./apps/llp-performance-aggregate-worker/Dockerfile
+    image: ${COMPOSE_PROJECT_NAME}-worker
+    env_file:
+      - .env
+    ports:
+      - '${WORKER_EXPOSE_PORT}:${WORKER_PORT}'
+    command: node ./dist/apps/worker/main.js

@@ -150,6 +150,14 @@ export class ApiService {
   }
 
   async getLiveTimeFrame(query: RequestLiveTimeFrame) {
+    const existing = await this.esService.indices.exists({
+      index: this.utilService.aggregatedDataIndex,
+    })
+    if (!existing) {
+      return {
+        data: undefined,
+      }
+    }
     const lastFrame = await this.esService.search<AggreatedData>({
       index: this.utilService.aggregatedDataIndex,
       size: 1,

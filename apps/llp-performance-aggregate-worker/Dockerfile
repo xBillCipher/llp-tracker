@@ -1,6 +1,6 @@
 # TODO: Remove dev deps from prod build
 # BUILDER - Stage 1
-FROM node:16-alpine as builder
+FROM --platform=linux/amd64 node:lts-alpine as builder
 WORKDIR /app
 RUN apk add --no-cache libc6-compat
 RUN apk update && yarn global add turbo@1.8.1
@@ -8,7 +8,7 @@ COPY . .
 RUN turbo prune --scope=llp-performance-aggregate-worker --docker
 
 # INSTALLER - Stage 2
-FROM node:16-alpine as installer
+FROM --platform=linux/amd64 node:lts-alpine as installer
 WORKDIR /app
 RUN apk add --no-cache libc6-compat
 RUN apk update && apk add g++ make py3-pip && yarn global add pnpm
@@ -22,11 +22,11 @@ RUN pnpm fetch
 
 # Build the project and its dependencies
 COPY --from=builder /app/out/full/ .
-RUN pnpm install -r --ignore-scripts
+RUN pnpm install
 RUN pnpm turbo run build --filter=llp-performance-aggregate-worker
 
 # # RUNNER - Stage 3
-FROM node:16-alpine AS runner
+FROM --platform=linux/amd64 node:lts-alpine AS runner
 WORKDIR /app
 
 # # Don't run production as root
